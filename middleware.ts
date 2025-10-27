@@ -1,7 +1,6 @@
 ﻿import { type NextRequest, NextResponse } from "next/server";
-import { updateSession } from "@/utils/supabase/middleware";
 
-const LOCALES = ["en","zh"] as const;
+const LOCALES = ["en", "zh"] as const;
 function pickLocale(req: NextRequest) {
   const cookie = req.cookies.get("NEXT_LOCALE")?.value?.toLowerCase();
   if (cookie && (LOCALES as readonly string[]).includes(cookie)) return cookie;
@@ -13,15 +12,21 @@ function pickLocale(req: NextRequest) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   // bypass for api/static/assets
-  if (pathname.startsWith("/api") || pathname.startsWith("/_next") || /\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml)$/i.test(pathname)) {
-    return updateSession(request);
+  if (
+    pathname.startsWith("/api") ||
+    pathname.startsWith("/_next") ||
+    /\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml)$/i.test(pathname)
+  ) {
+    return NextResponse.next({
+      request: { headers: request.headers },
+    });
   }
 
   const seg = pathname.split("/")[1];
   if ((LOCALES as readonly string[]).includes(seg)) {
-    const res = await updateSession(request);
-    // @ts-ignore cookies on NextResponse
-    res.cookies?.set?.("NEXT_LOCALE", seg, { path: "/", maxAge: 60*60*24*365 });
+    const res = NextResponse.next({ request: { headers: request.headers } });
+    // remember locale
+    res.cookies.set("NEXT_LOCALE", seg, { path: "/", maxAge: 60 * 60 * 24 * 365 });
     return res;
   }
 
