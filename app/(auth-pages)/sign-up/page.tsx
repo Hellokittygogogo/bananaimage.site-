@@ -1,4 +1,4 @@
-import { signUpAction } from "@/app/actions";
+﻿import { signUpAction } from "@/app/actions";
 import { FormMessage, Message } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
 import { encodedRedirect } from "@/utils/utils";
-import { redirect } from "next/navigation";
+import { redirect } from "next/navigation";`nimport { headers } from "next/headers";
 
 export default async function SignUp(props: {
   searchParams: Promise<Message>;
@@ -17,7 +17,7 @@ export default async function SignUp(props: {
   const signUpWithGoogle = async () => {
     "use server";
     const supabase = await createClient();
-    const origin = process.env.NEXT_PUBLIC_SITE_URL;
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || (await headers()).get("origin") || "";
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
