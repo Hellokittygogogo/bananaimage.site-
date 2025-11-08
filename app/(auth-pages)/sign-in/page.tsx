@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
 import { encodedRedirect } from "@/utils/utils";
-import { redirect } from "next/navigation";`nimport { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
 export default async function Login(props: { searchParams: Promise<Message> }) {
   const searchParams = await props.searchParams;
@@ -15,7 +16,7 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
   const signInWithGoogle = async () => {
     "use server";
     const supabase = await createClient();
-    const origin = process.env.NEXT_PUBLIC_SITE_URL || (await headers()).get("origin") || "";
+    const origin = (() => { const h = headers(); const proto = h.get("x-forwarded-proto") || "https"; const host = h.get("host") || ""; const fromHdr = host ? `${proto}://${host}` : ""; return process.env.NEXT_PUBLIC_SITE_URL || fromHdr; })();
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
