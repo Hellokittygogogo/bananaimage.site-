@@ -4,10 +4,10 @@ import Image from "next/image";
 import { useI18n } from "./i18n-provider";
 
 export function Logo() {
-  const { locale } = useI18n() as any;
+  const { } = useI18n() as any;
   return (
     <Link
-      href={`/${locale}/`}
+      href={"/"}
       className="flex items-center gap-2 hover:opacity-90 transition-opacity"
     >
       <div className="flex items-center justify-center">

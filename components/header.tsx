@@ -20,15 +20,15 @@ interface NavItem {
 }
 
 export default function Header({ user }: HeaderProps) {
-  const { t, locale } = useI18n() as any;
+  const { t } = useI18n() as any;
   const pathname = usePathname();
   const isDashboard = pathname?.startsWith("/dashboard");
 
   // Main navigation items
   const mainNavItems: NavItem[] = [
-    { label: t("nav.home"), href: `/${locale}/` },
-    { label: t("nav.generator"), href: `/${locale}/generator` },
-    { label: t("nav.pricing"), href: `/${locale}/pricing` },
+    { label: t("nav.home"), href: "/" },
+    { label: t("nav.generator"), href: "/generator" },
+    { label: t("nav.pricing"), href: "/pricing" },
   ];
 
   // Dashboard items - empty array as we don't want navigation items in dashboard
@@ -70,10 +70,10 @@ export default function Header({ user }: HeaderProps) {
               {!isDashboard && (
                 <>
                   <Button asChild size="sm" variant="default">
-                    <Link href={`/${locale}/profile`}>Profile</Link>
+                    <Link href={"/profile"}>Profile</Link>
                   </Button>
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/${locale}/dashboard`}>Dashboard</Link>
+                    <Link href={"/dashboard"}>Dashboard</Link>
                   </Button>
                 </>
               )}
@@ -86,10 +86,10 @@ export default function Header({ user }: HeaderProps) {
           ) : (
             <div className="hidden md:flex gap-2">
               <Button asChild size="sm" variant="outline">
-                <Link href={`/${locale}/sign-in`}>{t("auth.signIn")}</Link>
+                <Link href={"/sign-in"}>{t("auth.signIn")}</Link>
               </Button>
               <Button asChild size="sm">
-                <Link href={`/${locale}/sign-up`}>{t("auth.signUp")}</Link>
+                <Link href={"/sign-up"}>{t("auth.signUp")}</Link>
               </Button>
             </div>
           )}

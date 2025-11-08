@@ -54,8 +54,8 @@ export default async function RootLayout({
       <body className="bg-background text-foreground">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <div className="relative min-h-screen">
-            <Header user={user} />
             <I18nProvider locale={locale} messages={messages}>
+              <Header user={user} />
               <main className="flex-1">{children}</main>
             </I18nProvider>
             <Footer />
