@@ -12,6 +12,12 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
+  async rewrites() {
+    return [
+      { source: '/:locale(en|zh)', destination: '/' },
+      { source: '/:locale(en|zh)/:path*', destination: '/:path*' },
+    ];
+  },
 };
 
 export default nextConfig;
