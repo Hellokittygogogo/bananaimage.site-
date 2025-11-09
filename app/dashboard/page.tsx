@@ -1,10 +1,10 @@
-import { createClient } from "@/utils/supabase/server";
+﻿import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { SubscriptionStatusCard } from "@/components/dashboard/subscription-status-card";
 import { CreditsBalanceCard } from "@/components/dashboard/credits-balance-card";
 import { QuickActionsCard } from "@/components/dashboard/quick-actions-card";
 import { MyNamesCard } from "@/components/dashboard/my-names-card";
-import { GenerationHistoryCard } from "@/components/dashboard/generation-history-card";
+import { ImageHistoryCard } from "@/components/dashboard/image-history-card";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -68,7 +68,7 @@ export default async function DashboardPage() {
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
         <MyNamesCard />
-        <GenerationHistoryCard />
+        <ImageHistoryCard />
       </div>
 
       {/* Account Details Section */}

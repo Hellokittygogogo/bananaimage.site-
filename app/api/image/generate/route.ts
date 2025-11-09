@@ -87,7 +87,7 @@ export async function POST(req: Request) {
           if (customer && (customer.credits ?? 0) >= count) {
             const newCredits = (customer.credits || 0) - count;
             await admin.from('customers').update({ credits: newCredits, updated_at: new Date().toISOString() }).eq('id', customer.id);
-            await admin.from('credits_history').insert({ customer_id: customer.id, amount: count, type: 'subtract', description: 'image_generation' });
+            await admin.from('credits_history').insert({ customer_id: customer.id, amount: count, type: 'subtract', description: 'image_generation', metadata: { prompt, style, count, images: urls, public: false } });
           }
         }
       }
@@ -100,3 +100,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: e?.message || 'Server error' }, { status: 500 });
   }
 }
+
