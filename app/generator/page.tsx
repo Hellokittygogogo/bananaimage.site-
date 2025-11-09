@@ -4,36 +4,40 @@ import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const STYLES = [
+  { id: 'portrait', label: 'Portrait Photo', hint: 'cinematic portrait, shallow depth of field, natural light' },
+  { id: 'illustration', label: 'Illustration', hint: 'clean vector illustration, flat colors, minimal shading' },
+  { id: 'render3d', label: '3D Render', hint: 'octane render, soft light, realistic materials' },
+  { id: 'anime', label: 'Anime', hint: 'anime style, vibrant colors, dynamic lines' },
+  { id: 'cyberpunk', label: 'Cyberpunk', hint: 'neon lights, rainy streets, futuristic city' },
+  { id: 'vintage', label: 'Vintage Film', hint: '35mm film, grain, warm tones, soft focus' },
+];
 
 export default function GeneratorPage() {
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("");
+  const [style, setStyle] = useState(STYLES[0].id);
+  const [count, setCount] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
+  const [images, setImages] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    setFile(f);
-    setPreview(URL.createObjectURL(f));
-  };
-
   const onGenerate = async () => {
+    if (!prompt.trim()) { setError('Please enter a prompt'); return; }
     setLoading(true);
     setError(null);
-    setResult(null);
+    setImages([]);
     try {
-      const body = new FormData();
-      if (file) body.append("image", file);
-      body.append("prompt", prompt);
-      const res = await fetch("/api/image/edit", { method: "POST", body });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to edit image");
-      setResult(data.url || null);
+      const res = await fetch('/api/image/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, style, count })
+      });
+      const data = await res.json();\n      if (!res.ok) {\n        if (res.status === 401) { window.location.href = '/sign-in'; return; }\n        throw new Error(data.error || 'Failed to generate image');\n      }
+      setImages(data.urls || []);
     } catch (e:any) {
-      setError(e.message || "Failed");
+      setError(e.message || 'Failed');
     } finally {
       setLoading(false);
     }
@@ -41,50 +45,57 @@ export default function GeneratorPage() {
 
   return (
     <div className="container py-8">
-      <h1 className="text-3xl font-bold mb-6">AI Image Editor</h1>
+      <h1 className="text-3xl font-bold mb-6">AI Image Generator</h1>
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Upload & Prompt</CardTitle>
+            <CardTitle>Prompt & Settings</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <input type="file" accept="image/*" onChange={onFile} />
             <textarea
-              placeholder="Describe how to edit the image..."
+              placeholder="Describe what you want to create..."
               className="w-full min-h-28 rounded-md border p-3 text-sm bg-background"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
             />
+            <div className="flex gap-3">
+              <Select value={style} onValueChange={setStyle}>
+                <SelectTrigger className="w-1/2"><SelectValue placeholder="Style" /></SelectTrigger>
+                <SelectContent>
+                  {STYLES.map(s => <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <Select value={String(count)} onValueChange={(v)=>setCount(Number(v))}>
+                <SelectTrigger className="w-1/2"><SelectValue placeholder="Count" /></SelectTrigger>
+                <SelectContent>
+                  {[1,2,3,4].map(n => <SelectItem key={n} value={String(n)}>{n} image{n>1?'s':''}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
             <Button onClick={onGenerate} disabled={loading}>
-              {loading ? "Processing..." : "Generate"}
+              {loading ? 'Generating...' : 'Generate'}
             </Button>
             {error && <p className="text-sm text-destructive">{error}</p>}
           </CardContent>
         </Card>
         <div className="space-y-4">
-          {preview && (
+          {images.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Preview</CardTitle>
+                <CardTitle>Results</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="relative aspect-square w-full overflow-hidden rounded-md border">
-                  <Image src={preview} alt="preview" fill className="object-contain" />
+                <div className="grid grid-cols-2 gap-3">
+                  {images.map((src, i) => (
+                    <div key={i} className="relative aspect-square w-full overflow-hidden rounded-md border">
+                      <Image src={src} alt={`result-${i}`} fill className="object-contain" />
+                    </div>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
-          )}
-          {result && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Result</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="relative aspect-square w-full overflow-hidden rounded-md border">
-                  <Image src={result} alt="result" fill className="object-contain" />
-                </div>
-                <div className="mt-3">
-                  <a className="text-sm text-primary underline" href={result} target="_blank">Open image</a>
+                <div className="mt-3 flex gap-3 flex-wrap">
+                  {images.map((src, i) => (
+                    <a key={i} className="text-sm text-primary underline" href={src} target="_blank">Download #{i+1}</a>
+                  ))}
                 </div>
               </CardContent>
             </Card>
