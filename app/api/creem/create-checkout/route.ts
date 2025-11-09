@@ -17,9 +17,7 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
 
     const reqBody: any = {
       product_id: productId,
@@ -28,6 +26,7 @@ export async function POST(req: NextRequest) {
         user_id: user?.id || body.userId || "guest",
         product_type: body.productType || "credits",
         credits: body.credits || 0,
+        subscription_credits: body.productType === 'subscription' ? (body.credits || 0) : undefined,
       },
     };
     if (SUCCESS_URL) reqBody.success_url = SUCCESS_URL;

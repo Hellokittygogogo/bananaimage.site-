@@ -67,7 +67,6 @@ export default async function DashboardPage() {
 
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <MyNamesCard />
         <ImageHistoryCard />
       </div>
 
