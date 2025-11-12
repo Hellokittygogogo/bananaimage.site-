@@ -44,3 +44,16 @@ export function publicUrlFor(key: string) {
   const base = (process.env.R2_PUBLIC_BASE_URL || '').replace(/\/$/, '');
   return base ? `${base}/${key}`.replace(/\/+/, '/') : null;
 }
+
+export async function putObjectPublic(key: string, body: Uint8Array | Buffer | string, contentType = 'application/octet-stream') {
+  const Bucket = req('R2_BUCKET');
+  const c = client();
+  await c.send(new PutObjectCommand({ Bucket, Key: key, Body: body as any, ContentType: contentType }));
+  const url = publicUrlFor(key);
+  if (!url) {
+    // As a fallback, return a short-lived presigned GET url
+    const presigned = await presignGetUrl(key, 3600);
+    return presigned.url;
+  }
+  return url;
+}

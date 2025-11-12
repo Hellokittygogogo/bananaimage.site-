@@ -2,6 +2,7 @@
 import OpenAI from "openai";
 import { createClient, isSupabaseConfigured } from "@/utils/supabase/server";
 import { createServiceRoleClient, isServiceRoleConfigured } from "@/utils/supabase/service-role";
+import { putObjectPublic } from "@/lib/storage/r2";
 
 const STYLE_HINTS: Record<string, string> = {
   portrait: 'cinematic portrait, shallow depth of field, natural light',
@@ -23,7 +24,7 @@ async function generateOne(client: OpenAI, model: string, prompt: string) {
   } as any);
   const b64 = (gen as any)?.data?.[0]?.b64_json;
   if (!b64) throw new Error('Image generation failed');
-  return `data:image/png;base64,${b64}`;
+  return b64;
 }
 
 export async function POST(req: Request) {
@@ -61,22 +62,45 @@ export async function POST(req: Request) {
     const hint = STYLE_HINTS[style] || '';
     const finalPrompt = hint ? `${prompt}, ${hint}` : prompt;
 
-    const urls: string[] = [];
+    // 1) Generate b64 images
+    const b64s: string[] = [];
     let model = DEFAULT_MODEL;
     try {
       for (let i = 0; i < count; i++) {
-        urls.push(await generateOne(client, model, finalPrompt));
+        b64s.push(await generateOne(client, model, finalPrompt));
       }
-    } catch (e) {
+    } catch {
       // Fallback once with another model
-      urls.length = 0;
+      b64s.length = 0;
       model = FALLBACK_MODEL;
       for (let i = 0; i < count; i++) {
-        urls.push(await generateOne(client, model, finalPrompt));
+        b64s.push(await generateOne(client, model, finalPrompt));
       }
     }
 
-    // Deduct credits after successful generation
+    // 2) Upload to R2 if configured; otherwise return data URLs
+    const r2Enabled = !!(process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET);
+    let outUrls: string[] = [];
+    if (r2Enabled) {
+      try {
+        const supabaseTmp = await createClient();
+        const { data: { user: uTmp } } = await supabaseTmp.auth.getUser();
+        const baseKey = `gen/${uTmp?.id || 'anon'}/${Date.now()}`;
+        for (let i = 0; i < b64s.length; i++) {
+          const buf = Buffer.from(b64s[i], 'base64');
+          const key = `${baseKey}_${i}.png`;
+          const u = await putObjectPublic(key, buf, 'image/png');
+          outUrls.push(u);
+        }
+      } catch (e) {
+        console.error('R2 upload failed', e);
+        outUrls = b64s.map(b64 => `data:image/png;base64,${b64}`);
+      }
+    } else {
+      outUrls = b64s.map(b64 => `data:image/png;base64,${b64}`);
+    }
+
+    // 3) Deduct credits after successful generation and log metadata
     try {
       if (isSupabaseConfigured && isServiceRoleConfigured) {
         const supabase = await createClient();
@@ -87,7 +111,13 @@ export async function POST(req: Request) {
           if (customer && (customer.credits ?? 0) >= count) {
             const newCredits = (customer.credits || 0) - count;
             await admin.from('customers').update({ credits: newCredits, updated_at: new Date().toISOString() }).eq('id', customer.id);
-            await admin.from('credits_history').insert({ customer_id: customer.id, amount: count, type: 'subtract', description: 'image_generation', metadata: { prompt, style, count, images: urls, public: false } });
+            await admin.from('credits_history').insert({
+              customer_id: customer.id,
+              amount: count,
+              type: 'subtract',
+              description: 'image_generation',
+              metadata: { prompt, style, count, images: outUrls, public: false }
+            });
           }
         }
       }
@@ -95,9 +125,8 @@ export async function POST(req: Request) {
       console.error('credit deduction error', e);
     }
 
-    return NextResponse.json({ urls });
+    return NextResponse.json({ urls: outUrls });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || 'Server error' }, { status: 500 });
   }
 }
-
