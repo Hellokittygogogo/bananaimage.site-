@@ -51,7 +51,7 @@ export default function Header({ user }: HeaderProps) {
             <Link
               key={item.href}
               href={item.href}
-              className="text-lg font-semibold text-muted-foreground transition-colors hover:text-primary"
+              className="text-lg font-semibold text-foreground transition-colors hover:text-primary"
             >
               {item.label}
             </Link>
@@ -73,24 +73,23 @@ export default function Header({ user }: HeaderProps) {
                   <Button asChild size="sm" variant="default">
                     <Link href={"/profile"}>Profile</Link>
                   </Button>
-                  <Button asChild size="sm" variant="outline">
+                  <Button asChild size="sm" variant="default">
                     <Link href={"/dashboard"}>Dashboard</Link>
                   </Button>
                 </>
               )}
               <form action={signOutAction}>
-                <Button type="submit" variant="outline" size="sm">
+                <Button type="submit" variant="default" size="sm">
                   {t("auth.signOut")}
                 </Button>
               </form>
             </div>
           ) : (
             <div className="hidden md:flex gap-2">
-              <Button asChild size="sm" variant="outline">
+              <Button asChild size="sm" variant="default">
                 <Link href={"/sign-in"}>{t("auth.signIn")}</Link>
               </Button>
-              <Button asChild size="sm">
-                <Link href={"/sign-up"}>{t("auth.signUp")}</Link>
+              <Button asChild size="sm" variant="default">\n                    <Link href={"/sign-up"}>{t("auth.signUp")}</Link>
               </Button>
             </div>
           )}
