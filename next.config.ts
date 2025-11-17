@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
+  images: { remotePatterns: [ { protocol: 'https', hostname: 'pub-c529a27bb6e243c5969285be8a31424f.r2.dev' } ] },
   async rewrites() {
     return [
       { source: '/:locale(en|zh)', destination: '/' },
@@ -21,3 +22,4 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
