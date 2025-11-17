@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 const STYLES = [
   { id: 'portrait', label: 'Portrait Photo', hint: 'cinematic portrait, shallow depth of field, natural light' },
@@ -34,7 +35,11 @@ export default function GeneratorPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, style, count })
       });
-      const data = await res.json();\n      if (!res.ok) {\n        if (res.status === 401) { window.location.href = '/sign-in'; return; }\n        throw new Error(data.error || 'Failed to generate image');\n      }
+      const data = await res.json();
+      if (!res.ok) {
+        if (res.status === 401) { window.location.href = '/sign-in'; return; }
+        throw new Error(data.error || 'Failed to generate image');
+      }
       setImages(data.urls || []);
     } catch (e:any) {
       setError(e.message || 'Failed');
@@ -45,28 +50,28 @@ export default function GeneratorPage() {
 
   return (
     <div className="container py-8">
-      <h1 className="text-3xl font-bold mb-6">AI Image Generator</h1>
+      <h1 className="text-3xl font-bold mb-6 text-foreground">AI Image Generator</h1>
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Prompt & Settings</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <textarea
+            <Textarea
               placeholder="Describe what you want to create..."
-              className="w-full min-h-28 rounded-md border p-3 text-sm bg-background"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
+              className="w-full min-h-28 rounded-md border border-border p-3 text-sm bg-card text-foreground placeholder:text-muted-foreground"
             />
             <div className="flex gap-3">
               <Select value={style} onValueChange={setStyle}>
-                <SelectTrigger className="w-1/2"><SelectValue placeholder="Style" /></SelectTrigger>
+                <SelectTrigger className="w-1/2 bg-card text-foreground border-border"><SelectValue placeholder="Style" /></SelectTrigger>
                 <SelectContent>
                   {STYLES.map(s => <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>)}
                 </SelectContent>
               </Select>
               <Select value={String(count)} onValueChange={(v)=>setCount(Number(v))}>
-                <SelectTrigger className="w-1/2"><SelectValue placeholder="Count" /></SelectTrigger>
+                <SelectTrigger className="w-1/2 bg-card text-foreground border-border"><SelectValue placeholder="Count" /></SelectTrigger>
                 <SelectContent>
                   {[1,2,3,4].map(n => <SelectItem key={n} value={String(n)}>{n} image{n>1?'s':''}</SelectItem>)}
                 </SelectContent>
