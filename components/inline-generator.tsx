@@ -1,7 +1,6 @@
 ﻿"use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -93,7 +92,7 @@ export default function InlineGenerator() {
                 <div className="grid grid-cols-2 gap-3">
                   {images.map((src, i) => (
                     <div key={i} className="relative aspect-square w-full overflow-hidden rounded-md border">
-                      <Image src={src} alt={`result-${i}`} fill className="object-contain" />
+                      <img src={src} alt={`result-${i}`} className="w-full h-full object-contain" />
                     </div>
                   ))}
                 </div>
