@@ -14,7 +14,7 @@ export default function Home() {
               上传你的图片，选择风格，一键生成 1024 px 高清新图
             </p>
             <div className="flex gap-3">
-              <a href="#editor" className="inline-flex items-center rounded-md bg-yellow-400 px-5 py-3 font-medium text-black shadow hover:brightness-95">
+              <a href="/generator" className="inline-flex items-center rounded-md bg-yellow-400 px-5 py-3 font-medium text-black shadow hover:brightness-95">
                 Try Generator
               </a>
             </div>
@@ -23,11 +23,6 @@ export default function Home() {
             <div className="bg-gray-300/70 rounded-xl h-64 md:h-80 w-full" />
           </div>
         </div>
-      </section>
-
-      {/* Editor (kept component) */}
-      <section id="editor" className="container px-4 md:px-6 py-8 md:py-12">
-        <InlineGenerator />
       </section>
 
       {/* Features */}
