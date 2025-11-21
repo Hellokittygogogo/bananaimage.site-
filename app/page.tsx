@@ -1,4 +1,4 @@
-﻿import InlineGenerator from "@/components/inline-generator";
+﻿import dynamic from "next/dynamic";\nconst InlineGenerator = dynamic(() => import("@/components/inline-generator"), { ssr: false });
 
 export default function Home() {
   return (
