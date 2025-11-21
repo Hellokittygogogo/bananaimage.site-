@@ -89,8 +89,7 @@ export default function Header({ user }: HeaderProps) {
               <Button asChild size="sm" variant="default">
                 <Link href={"/sign-in"}>{t("auth.signIn")}</Link>
               </Button>
-              <Button asChild size="sm" variant="default">\n                    <Link href={"/sign-up"}>{t("auth.signUp")}</Link>
-              </Button>
+              <Button asChild size="sm" variant="default"><Link href={"/sign-up"}>{t("auth.signUp")}</Link></Button>
             </div>
           )}
           <MobileNav items={navItems} user={user} isDashboard={isDashboard} />
