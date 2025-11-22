@@ -1,6 +1,4 @@
-﻿import dynamic from "next/dynamic";\nconst InlineGenerator = dynamic(() => import("@/components/inline-generator"), { ssr: false });
-
-export default function Home() {
+﻿export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Hero (kept) */}
@@ -116,3 +114,4 @@ export default function Home() {
     </div>
   );
 }
+
